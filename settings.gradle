@@ -1,0 +1,4 @@
+rootProject.name = "Student's Accounting"
+include ':app'
+include ':Core'
+include ':Repository'
