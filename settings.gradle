@@ -2,3 +2,5 @@ rootProject.name = "Student's Accounting"
 include ':app'
 include ':Core'
 include ':Repository'
+include ':DefaultResources'
+include ':Utils'

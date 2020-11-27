@@ -11,7 +11,9 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/Core" />
+            <option value="$PROJECT_DIR$/DefaultResources" />
             <option value="$PROJECT_DIR$/Repository" />
+            <option value="$PROJECT_DIR$/Utils" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
