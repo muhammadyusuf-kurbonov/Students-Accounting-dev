@@ -2,9 +2,7 @@ package uz.muhammadyusuf.kurbonov.core.viewmodels.add_edit
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,8 +14,6 @@ import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 
 class AddEditViewModel(private val id: Int = -1) : ViewModel() {
     private lateinit var repository: Repository
-    private val job = Job()
-    private val scope: CoroutineScope = CoroutineScope(job + Dispatchers.IO)
 
     private val itemsData = MutableStateFlow<List<AccountingItem>>(
         emptyList()
@@ -47,9 +43,9 @@ class AddEditViewModel(private val id: Int = -1) : ViewModel() {
         )
 
         if (id > -1) {
-            scope.launch { repository.updateGroup(accountingGroup) }
+            viewModelScope.launch { repository.updateGroup(accountingGroup) }
         } else {
-            scope.launch { repository.insertGroup(accountingGroup) }
+            viewModelScope.launch { repository.insertGroup(accountingGroup) }
         }
 
     }

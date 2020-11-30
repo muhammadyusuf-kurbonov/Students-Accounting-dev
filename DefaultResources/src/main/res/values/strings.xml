@@ -2,4 +2,8 @@
 <resources>
     <string name="loading_label">Loading …</string>
     <string name="empty_message">No Data.</string>
+    <string name="error_message">Error</string>
+
+    <string name="add_label">Add</string>
+    <string name="edit_label">Edit</string>
 </resources>
