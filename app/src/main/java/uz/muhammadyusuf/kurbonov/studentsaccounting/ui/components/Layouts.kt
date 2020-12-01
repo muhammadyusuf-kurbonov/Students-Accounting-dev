@@ -55,7 +55,7 @@ fun MainScreenLayout(
 
 
 @Composable
-fun AddEditLayout(
+fun DetailsLayout(
     modifier: Modifier = Modifier,
     showState: State<Boolean>,
     content: @Composable ColumnScope.() -> Unit = {}

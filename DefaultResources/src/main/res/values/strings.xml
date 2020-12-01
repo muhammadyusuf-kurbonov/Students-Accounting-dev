@@ -6,4 +6,7 @@
 
     <string name="add_label">Add</string>
     <string name="edit_label">Edit</string>
+    <string name="description">Description</string>
+    <string name="close">Close</string>
+    <string name="details">Details</string>
 </resources>

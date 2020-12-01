@@ -8,7 +8,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ContextAmbient
@@ -46,11 +45,12 @@ class MainActivity : AppCompatActivity() {
 
                         val addEditViewModel = viewModel<AddEditViewModel>()
                         addEditViewModel.initRepository(ContextAmbient.current)
-                        AddEditScreen(
-                            showState = derivedStateOf {
-                                screenState.value is ScreenStates.AddEditScreenState
-                            }, addEditViewModel = addEditViewModel
-                        )
+
+                        if (screenState.value is ScreenStates.AddEditScreenState)
+                            AddEditScreen(
+                                showState = mutableStateOf(true),
+                                viewModel = addEditViewModel
+                            )
                     }
                 }
             }

@@ -1,33 +1,39 @@
 package uz.muhammadyusuf.kurbonov.studentsaccounting.ui
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.gesture.tapGestureFilter
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
+import androidx.compose.ui.window.Dialog
 import androidx.ui.tooling.preview.Preview
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uz.muhammadyusuf.kurbonov.core.states.AccountingGroupLoadStates
 import uz.muhammadyusuf.kurbonov.core.viewmodels.add_edit.AddEditViewModel
 import uz.muhammadyusuf.kurbonov.defaultresources.EmptyPage
 import uz.muhammadyusuf.kurbonov.defaultresources.ErrorPage
 import uz.muhammadyusuf.kurbonov.defaultresources.LoadingPage
 import uz.muhammadyusuf.kurbonov.defaultresources.R
-import uz.muhammadyusuf.kurbonov.repository.models.AccountingGroupItem
-import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.AddEditLayout
+import uz.muhammadyusuf.kurbonov.repository.models.AccountingGroup
+import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.DetailsLayout
 import uz.muhammadyusuf.kurbonov.utils.formatAsDate
-import uz.muhammadyusuf.kurbonov.utils.openDatePickerDialog
 
 @Composable
 fun MainScreen(listState: State<AccountingGroupLoadStates>) {
@@ -44,49 +50,168 @@ fun MainScreen(listState: State<AccountingGroupLoadStates>) {
 }
 
 @Composable
-fun AddEditScreen(showState: State<Boolean>, id: Int = -1, addEditViewModel: AddEditViewModel) {
-    val item = AccountingGroupItem()
+fun DetailsScreen(
+    showState: MutableState<Boolean>,
+    item: AccountingGroup
+) {
 
-    var date = remember { mutableStateOf(System.currentTimeMillis()) }
-
-    AddEditLayout(showState = showState) {
+    DetailsLayout(showState = showState) {
         Text(
             text = stringResource(
-                id = if (id == -1) R.string.add_label
-                else R.string.edit_label
+                id = R.string.details
             ),
             style = MaterialTheme.typography.h6,
-            modifier = Modifier.padding(defaultPadding())
+            modifier = Modifier.fillMaxWidth().padding(defaultPadding())
         )
-
-        OutlinedTextField(value = item.description, onValueChange = { item.description = it })
-
-        val context = ContextAmbient.current
 
         Text(
-            text = date.value.formatAsDate(),
-            modifier = Modifier.tapGestureFilter {
-                addEditViewModel.viewModelScope.launch {
-                    date.value = openDatePickerDialog(context)
-                }
-            }.border(1.dp, Color.Black.copy(alpha = 0.42f), RoundedCornerShape(4.dp))
-                .padding(defaultMargin())
+            text = "Date ${item.groupItem.date.formatAsDate()}",
+            modifier = Modifier.fillMaxWidth().padding(defaultMargin())
         )
 
-        Button(onClick = { addEditViewModel.submit(item) }) {
-            Text(
-                text = stringResource(
-                    id = if (id == -1) R.string.add_label
-                    else R.string.edit_label
-                )
-            )
+        LazyColumnFor(items = item.items) {
+
+            Row(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
+                Text(text = it.itemName)
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = it.totalSum.toString())
+            }
+
+            Divider()
+        }
+
+        Button(onClick = { showState.value = false }) {
+            Text(text = stringResource(id = R.string.close))
         }
     }
 }
 
+
+@ExperimentalCoroutinesApi
+@Composable
+fun AddEditScreen(
+    showState: MutableState<Boolean>,
+    item: AccountingGroup? = null,
+    viewModel: AddEditViewModel
+) {
+    if (showState.value) {
+
+        val itemName = remember { mutableStateOf("") }
+        val itemError = remember { mutableStateOf(false) }
+        val itemSum = remember { mutableStateOf(0) }
+        val date = remember { mutableStateOf(System.currentTimeMillis()) }
+        val list = viewModel.getItems().collectAsState()
+
+        Dialog(onDismissRequest = {
+            showState.value = false
+        }) {
+
+            Card(
+                backgroundColor = MaterialTheme.colors.background,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Box {
+                    Image(asset = vectorResource(id = R.drawable.ic_action_name))
+                    Column(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
+                        Text(
+                            text = stringResource(
+                                id = if (item != null) R.string.edit_label
+                                else R.string.add_label
+                            ),
+                            style = MaterialTheme.typography.subtitle1,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(defaultPadding())
+                        )
+
+                        Card(
+                            elevation = 0.dp,
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colors.onBackground.copy(alpha = 0.42f)
+                            ),
+                            modifier = Modifier.padding(defaultPadding())
+                        ) {
+                            Text(
+                                text = "Date: ${date.value.formatAsDate()}",
+                                modifier = Modifier.padding(defaultPadding())
+                            )
+                        }
+
+                        LazyColumn {
+                            items(items = list.value) {
+                                Row(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
+                                    Text(text = it.itemName)
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Text(text = it.totalSum.toString())
+                                }
+
+                                Divider()
+                            }
+
+                            item {
+
+                                Row(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
+                                    OutlinedTextField(
+                                        value = itemName.value,
+                                        onValueChange = { itemName.component2().invoke(it) },
+                                        modifier = Modifier.weight(2.0f),
+                                        isErrorValue = itemError.value
+                                    )
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    OutlinedTextField(
+                                        value = itemSum.value.toString(),
+                                        onValueChange = {
+                                            itemSum.value = try {
+                                                it.toInt()
+                                            } catch (e: Exception) {
+                                                0
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1.0f),
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                    )
+                                    Button(
+                                        onClick = {
+                                            if (itemName.value.isEmpty()) {
+                                                itemError.value = true
+                                                return@Button
+                                            }
+                                            viewModel.addItem(
+                                                AccountingItem(
+                                                    itemName = itemName.value,
+                                                    totalSum = itemSum.value
+                                                )
+                                            )
+                                            itemName.value = ""
+                                            itemSum.value = 0
+                                        }, modifier = Modifier.weight(1f)
+                                            .align(Alignment.CenterVertically)
+                                            .fillMaxSize()
+                                            .padding(defaultPadding())
+                                    ) {
+                                        Image(
+                                            asset = Icons.Default.Add, colorFilter = ColorFilter(
+                                                Color.Green, BlendMode.SrcAtop
+                                            ),
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+                                }
+
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@ExperimentalCoroutinesApi
 @Preview(showBackground = true)
 @Composable
 fun previewAddEdit() {
-    AddEditScreen(derivedStateOf { true }, addEditViewModel = AddEditViewModel())
+    AddEditScreen(showState = mutableStateOf(true), viewModel = AddEditViewModel())
 }
 
