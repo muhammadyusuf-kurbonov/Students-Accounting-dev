@@ -1,47 +1,99 @@
 package uz.muhammadyusuf.kurbonov.studentsaccounting.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.compose.ui.window.Dialog
-import androidx.ui.tooling.preview.Preview
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import uz.muhammadyusuf.kurbonov.core.states.AccountingGroupLoadStates
 import uz.muhammadyusuf.kurbonov.core.viewmodels.add_edit.AddEditViewModel
+import uz.muhammadyusuf.kurbonov.core.viewmodels.main.MainViewModel
 import uz.muhammadyusuf.kurbonov.defaultresources.EmptyPage
 import uz.muhammadyusuf.kurbonov.defaultresources.ErrorPage
 import uz.muhammadyusuf.kurbonov.defaultresources.LoadingPage
 import uz.muhammadyusuf.kurbonov.defaultresources.R
-import uz.muhammadyusuf.kurbonov.repository.models.AccountingGroup
 import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
-import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.DetailsLayout
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.MainListItem
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.Padding
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.Spinner
 import uz.muhammadyusuf.kurbonov.utils.formatAsDate
+import uz.muhammadyusuf.kurbonov.utils.openDatePickerDialog
+import uz.muhammadyusuf.kurbonov.utils.reformatDate
 
+@ExperimentalCoroutinesApi
 @Composable
-fun MainScreen(listState: State<AccountingGroupLoadStates>) {
+fun MainScreen(
+    listState: State<AccountingGroupLoadStates>,
+    onNewPartRequest: () -> Unit = {}
+) {
     when (listState.value) {
         AccountingGroupLoadStates.LoadingState -> LoadingPage(
             modifier = Modifier.fillMaxSize()
         )
-        is AccountingGroupLoadStates.Data -> TODO()
+        is AccountingGroupLoadStates.Data -> {
+
+            Surface(color = MaterialTheme.colors.surface) {
+                Box {
+                    val items = (listState.value as AccountingGroupLoadStates.Data).data
+                    LazyColumn {
+
+                        item {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Text(
+                                    text = "Balance",
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                        .padding(defaultPadding())
+                                )
+
+                                val model = viewModel<MainViewModel>()
+                                model.initRepository(AmbientContext.current)
+
+                                Text(
+                                    text = model.getTotalSum().collectAsState().value.toString(),
+                                    style = MaterialTheme.typography.h4,
+                                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(
+                                        defaultMargin()
+                                    )
+                                )
+                            }
+                        }
+
+                        itemsIndexed(
+                            items = items
+                        ) { index, item ->
+                            if (items.size - index - 1 < 10)
+                                onNewPartRequest()
+                            Padding(paddingValues = PaddingValues(defaultMargin()))
+                            {
+                                MainListItem(item = item)
+                            }
+                        }
+                    }
+                }
+            }
+
+
+        }
         AccountingGroupLoadStates.EmptyList -> EmptyPage(
             modifier = Modifier.fillMaxSize()
         )
@@ -49,169 +101,139 @@ fun MainScreen(listState: State<AccountingGroupLoadStates>) {
     }
 }
 
+//@Composable
+//fun DetailsScreen(
+//    showState: MutableState<Boolean>,
+//    item: AccountingGroup
+//) {
+//
+//    DetailsLayout(showState = showState) {
+//        Text(
+//            text = stringResource(
+//                id = R.string.details
+//            ),
+//            style = MaterialTheme.typography.h6,
+//            modifier = Modifier.fillMaxWidth().padding(defaultPadding())
+//        )
+//
+//        Text(
+//            text = "Date ${item.groupItem.date.formatAsDate()}",
+//            modifier = Modifier.fillMaxWidth().padding(defaultMargin())
+//        )
+//
+//        LazyColumnFor(items = item.items) {
+//
+//            Row(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
+//                Text(text = it.itemName)
+//                Spacer(modifier = Modifier.weight(1f))
+//                Text(text = it.totalSum.toString())
+//            }
+//
+//            Divider()
+//        }
+//
+//        Button(onClick = { showState.value = false }) {
+//            Text(text = stringResource(id = R.string.close))
+//        }
+//    }
+//}
+//
+//
+
 @Composable
-fun DetailsScreen(
-    showState: MutableState<Boolean>,
-    item: AccountingGroup
-) {
+fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card(
+            modifier = Modifier.padding(defaultPadding()),
+            shape = RoundedCornerShape(8.dp)
+        ) {
 
-    DetailsLayout(showState = showState) {
-        Text(
-            text = stringResource(
-                id = R.string.details
-            ),
-            style = MaterialTheme.typography.h6,
-            modifier = Modifier.fillMaxWidth().padding(defaultPadding())
-        )
+            val date = remember { mutableStateOf(System.currentTimeMillis().formatAsDate()) }
+            val description = remember { mutableStateOf("") }
+            val sum = remember { mutableStateOf(0) }
+            val sendingState = remember { mutableStateOf(false) }
 
-        Text(
-            text = "Date ${item.groupItem.date.formatAsDate()}",
-            modifier = Modifier.fillMaxWidth().padding(defaultMargin())
-        )
+            val itemType = remember { mutableStateOf("in") }
 
-        LazyColumnFor(items = item.items) {
+            Padding(paddingValues = PaddingValues(defaultMargin())) {
+                Column {
 
-            Row(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
-                Text(text = it.itemName)
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = it.totalSum.toString())
-            }
+                    Text(
+                        text = stringResource(id = R.string.add_label),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.h5
+                    )
 
-            Divider()
-        }
+                    Spinner(
+                        modifier = Modifier.fillMaxWidth().padding(defaultPadding()),
+                        listOf("Income", "Outcome")
+                    ) {
+                        if (it == "Income")
+                            itemType.value = "in"
+                        else
+                            itemType.value = "out"
+                    }
 
-        Button(onClick = { showState.value = false }) {
-            Text(text = stringResource(id = R.string.close))
-        }
-    }
-}
-
-
-@ExperimentalCoroutinesApi
-@Composable
-fun AddEditScreen(
-    showState: MutableState<Boolean>,
-    item: AccountingGroup? = null,
-    viewModel: AddEditViewModel
-) {
-    if (showState.value) {
-
-        val itemName = remember { mutableStateOf("") }
-        val itemError = remember { mutableStateOf(false) }
-        val itemSum = remember { mutableStateOf(0) }
-        val date = remember { mutableStateOf(System.currentTimeMillis()) }
-        val list = viewModel.getItems().collectAsState()
-
-        Dialog(onDismissRequest = {
-            showState.value = false
-        }) {
-
-            Card(
-                backgroundColor = MaterialTheme.colors.background,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Box {
-                    Image(asset = vectorResource(id = R.drawable.ic_action_name))
-                    Column(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
-                        Text(
-                            text = stringResource(
-                                id = if (item != null) R.string.edit_label
-                                else R.string.add_label
-                            ),
-                            style = MaterialTheme.typography.subtitle1,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(defaultPadding())
-                        )
-
-                        Card(
-                            elevation = 0.dp,
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colors.onBackground.copy(alpha = 0.42f)
-                            ),
-                            modifier = Modifier.padding(defaultPadding())
-                        ) {
-                            Text(
-                                text = "Date: ${date.value.formatAsDate()}",
-                                modifier = Modifier.padding(defaultPadding())
+                    OutlinedTextField(
+                        value = date.value,
+                        onValueChange = {},
+                        label = { Text(text = "Date") },
+                        leadingIcon = {
+                            val context = AmbientContext.current
+                            Image(
+                                modifier = Modifier.clickable(onClick = {
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        date.value = openDatePickerDialog(context).formatAsDate()
+                                    }
+                                }),
+                                imageVector = vectorResource(
+                                    id =
+                                    uz.muhammadyusuf.kurbonov.studentsaccounting.R.drawable.ic_baseline_calendar_today_24
+                                ),
+                                colorFilter = ColorFilter(
+                                    MaterialTheme.colors.onBackground,
+                                    BlendMode.SrcAtop
+                                )
                             )
                         }
+                    )
 
-                        LazyColumn {
-                            items(items = list.value) {
-                                Row(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
-                                    Text(text = it.itemName)
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    Text(text = it.totalSum.toString())
-                                }
+                    OutlinedTextField(
+                        value = description.value,
+                        onValueChange = { description.value = it },
+                        label = { Text(text = stringResource(id = R.string.description)) }
+                    )
 
-                                Divider()
-                            }
+                    OutlinedTextField(
+                        value = sum.value.toString(),
+                        onValueChange = { sum.value = if (it.isEmpty()) 0 else it.toInt() },
+                        label = { Text(text = stringResource(id = R.string.description)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
 
-                            item {
+                    val model = viewModel<AddEditViewModel>()
+                    model.initRepository(AmbientContext.current)
 
-                                Row(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
-                                    OutlinedTextField(
-                                        value = itemName.value,
-                                        onValueChange = { itemName.component2().invoke(it) },
-                                        modifier = Modifier.weight(2.0f),
-                                        isErrorValue = itemError.value
+                    Button(
+                        modifier = Modifier.padding(defaultPadding()),
+                        onClick = {
+                            if (!sendingState.value) {
+                                model.submit(
+                                    item = AccountingItem(
+                                        itemDescription = description.value,
+                                        date = date.value.reformatDate("dd MMM yyyy", "yyyy-MM-DD"),
+                                        totalSum = sum.value * if (itemType.value == "in") 1 else -1
                                     )
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    OutlinedTextField(
-                                        value = itemSum.value.toString(),
-                                        onValueChange = {
-                                            itemSum.value = try {
-                                                it.toInt()
-                                            } catch (e: Exception) {
-                                                0
-                                            }
-                                        },
-                                        modifier = Modifier.weight(1.0f),
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                                    )
-                                    Button(
-                                        onClick = {
-                                            if (itemName.value.isEmpty()) {
-                                                itemError.value = true
-                                                return@Button
-                                            }
-                                            viewModel.addItem(
-                                                AccountingItem(
-                                                    itemName = itemName.value,
-                                                    totalSum = itemSum.value
-                                                )
-                                            )
-                                            itemName.value = ""
-                                            itemSum.value = 0
-                                        }, modifier = Modifier.weight(1f)
-                                            .align(Alignment.CenterVertically)
-                                            .fillMaxSize()
-                                            .padding(defaultPadding())
-                                    ) {
-                                        Image(
-                                            asset = Icons.Default.Add, colorFilter = ColorFilter(
-                                                Color.Green, BlendMode.SrcAtop
-                                            ),
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
+                                ) {
+                                    onDismissRequest()
                                 }
-
-
                             }
-                        }
+                        }) {
+                        Text(text = if (sendingState.value) "Sending ..." else "Submit")
                     }
                 }
             }
+
         }
     }
 }
-
-@ExperimentalCoroutinesApi
-@Preview(showBackground = true)
-@Composable
-fun previewAddEdit() {
-    AddEditScreen(showState = mutableStateOf(true), viewModel = AddEditViewModel())
-}
-

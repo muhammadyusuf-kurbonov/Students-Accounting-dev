@@ -16,8 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.ui.tooling.preview.Preview
 import uz.muhammadyusuf.kurbonov.studentsaccounting.R
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.animations.CardGoInAnimation
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.bottomCardHeight
@@ -36,7 +36,7 @@ fun MainScreenLayout(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onFABClick) {
-                Icon(asset = Icons.Default.Add, tint = Color.White)
+                Icon(imageVector = Icons.Default.Add, tint = Color.White)
             }
         },
         isFloatingActionButtonDocked = true,
@@ -45,9 +45,10 @@ fun MainScreenLayout(
             BottomAppBar(cutoutShape = CircleShape) {
 
             }
-        }
+        },
+        backgroundColor = MaterialTheme.colors.surface
     ) {
-        Box(modifier = Modifier.padding(defaultPadding())) {
+        Box(modifier = Modifier.padding(defaultPadding()).fillMaxSize()) {
             content()
         }
     }
@@ -105,10 +106,17 @@ fun DetailsLayout(
 
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun previewMainScreen() {
     MainScreenLayout {
         Text(text = "Hallo")
+    }
+}
+
+@Composable
+fun Padding(paddingValues: PaddingValues, content: @Composable BoxScope.() -> Unit) {
+    Box(modifier = Modifier.padding(paddingValues)) {
+        content()
     }
 }

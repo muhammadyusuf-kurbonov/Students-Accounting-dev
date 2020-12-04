@@ -2,16 +2,25 @@ package uz.muhammadyusuf.kurbonov.utils
 
 import android.app.DatePickerDialog
 import android.content.Context
+import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-fun Long.formatAsDate(pattern: String) =
+fun Long.formatAsDate(pattern: String): String =
     SimpleDateFormat(pattern, Locale.getDefault()).format(Date(this))
 
-fun Long.formatAsDate() = formatAsDate("dd MMM yyyy")
+fun Long.formatAsDate(): String = formatAsDate("dd MMM yyyy")
 
+fun String.reformatDate(oldFormat: String, newFormat: String): String {
+    val date = SimpleDateFormat(oldFormat, Locale.getDefault()).parse(this)
+
+    val result = date?.time?.formatAsDate(newFormat)
+        ?: throw IllegalArgumentException("Wrong pattern. Check it")
+    Log.d("Dates", "$this => $result")
+    return result
+}
 
 suspend fun openDatePickerDialog(context: Context) = suspendCoroutine<Long> {
     var date = System.currentTimeMillis()

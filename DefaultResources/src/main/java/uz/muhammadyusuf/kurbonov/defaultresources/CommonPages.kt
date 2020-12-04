@@ -12,14 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageAsset
-import androidx.compose.ui.graphics.vector.VectorAsset
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.ui.tooling.preview.Preview
 
 
 @Composable
@@ -54,7 +54,7 @@ fun EmptyPage(modifier: Modifier = Modifier) {
 fun ErrorPage(
     modifier: Modifier = Modifier,
     errorMessage: String = stringResource(id = R.string.error_message),
-    imageAsset: ImageAsset? = null
+    imageAsset: ImageBitmap? = null
 ) {
     Box(modifier = modifier) {
         Column(
@@ -62,7 +62,7 @@ fun ErrorPage(
         ) {
             if (imageAsset != null)
                 Image(
-                    asset = imageAsset,
+                    bitmap = imageAsset,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
@@ -82,7 +82,7 @@ fun ErrorPage(
 fun ErrorVectorPage(
     modifier: Modifier = Modifier,
     errorMessage: String = stringResource(id = R.string.error_message),
-    imageAsset: VectorAsset? = null
+    imageAsset: ImageVector? = null
 ) {
     Box(modifier = modifier) {
         Column(
@@ -91,7 +91,7 @@ fun ErrorVectorPage(
 
             if (imageAsset != null)
                 Image(
-                    asset = imageAsset,
+                    imageVector = imageAsset,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 

@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import uz.muhammadyusuf.kurbonov.core.repos.Repository
 import uz.muhammadyusuf.kurbonov.core.repos.RepositoryImpl
-import uz.muhammadyusuf.kurbonov.repository.models.AccountingGroup
-import uz.muhammadyusuf.kurbonov.repository.models.AccountingGroupItem
 import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 
 class AddEditViewModel(private val id: Int = -1) : ViewModel() {
@@ -36,17 +34,10 @@ class AddEditViewModel(private val id: Int = -1) : ViewModel() {
         itemsData.value = itemsData.value.toMutableList().apply { remove(accountingItem) }
     }
 
-    fun submit(accountingGroupItem: AccountingGroupItem) {
-        val accountingGroup = AccountingGroup(
-            accountingGroupItem,
-            itemsData.value
-        )
-
-        if (id > -1) {
-            viewModelScope.launch { repository.updateGroup(accountingGroup) }
-        } else {
-            viewModelScope.launch { repository.insertGroup(accountingGroup) }
+    fun submit(item: AccountingItem, onFinish: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.insertNewItem(item)
+            onFinish()
         }
-
     }
 }

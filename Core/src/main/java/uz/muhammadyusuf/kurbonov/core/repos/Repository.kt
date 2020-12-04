@@ -1,19 +1,15 @@
 package uz.muhammadyusuf.kurbonov.core.repos
 
 import android.content.Context
-import kotlinx.coroutines.flow.Flow
-import uz.muhammadyusuf.kurbonov.repository.models.AccountingGroup
+import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 
 internal interface Repository {
-    fun getSingleAllData(): Flow<List<AccountingGroup>>
 
     fun initDatabase(context: Context)
 
-    fun listenAllData(): Flow<List<AccountingGroup>>
+    suspend fun insertNewItem(item: AccountingItem)
 
-    suspend fun getSingleGroup(id: Int): AccountingGroup
+    suspend fun getFirstPart(): List<AccountingItem>
 
-    suspend fun insertGroup(accountingGroup: AccountingGroup)
-
-    suspend fun updateGroup(accountingGroup: AccountingGroup)
+    suspend fun calculateSum(): Int
 }

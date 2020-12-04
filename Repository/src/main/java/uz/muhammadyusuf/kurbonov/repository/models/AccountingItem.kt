@@ -1,23 +1,15 @@
 package uz.muhammadyusuf.kurbonov.repository.models
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import uz.muhammadyusuf.kurbonov.utils.formatAsDate
 
-@Entity(
-    foreignKeys = [
-        ForeignKey(
-            entity = AccountingGroupItem::class,
-            parentColumns = ["id"],
-            childColumns = ["groupId"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
-)
+@Entity
 data class AccountingItem(
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0,
-    var itemName: String = "",
+    var itemDescription: String = "",
     var totalSum: Int = 0,
-    var groupId: Int = -1
+    var author: String = "Muhammadyusuf",
+    var date: String = System.currentTimeMillis().formatAsDate("yyyy-MM-DD")
 )

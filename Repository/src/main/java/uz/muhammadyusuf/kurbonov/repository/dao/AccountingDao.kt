@@ -1,49 +1,29 @@
 package uz.muhammadyusuf.kurbonov.repository.dao
 
 import androidx.room.*
-import kotlinx.coroutines.flow.Flow
-import uz.muhammadyusuf.kurbonov.repository.models.AccountingGroup
-import uz.muhammadyusuf.kurbonov.repository.models.AccountingGroupItem
 import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 
 @Dao
 abstract class AccountingDao {
-    @Insert
-    protected abstract suspend fun insertGroupItem(item: AccountingGroupItem)
 
     @Insert
-    protected abstract suspend fun insertItem(item: AccountingItem)
-
-    @Transaction
-    open suspend fun insertGroup(group: AccountingGroup) {
-        insertGroupItem(group.groupItem)
-        group.items.forEach {
-            insertItem(it)
-        }
-    }
-
-    @Query("SELECT * FROM AccountingGroupItem")
-    abstract suspend fun getAllGroups(): List<AccountingGroup>
-
-
-    @Query("SELECT * FROM AccountingGroupItem")
-    abstract fun listenAllGroups(): Flow<List<AccountingGroup>>
+    abstract suspend fun insertNewItem(item: AccountingItem)
 
     @Update
-    protected abstract suspend fun updateGroupItem(item: AccountingGroupItem)
+    abstract suspend fun updateItem(item: AccountingItem)
 
-    @Update
-    protected abstract suspend fun updateItem(item: AccountingItem)
+    @Delete
+    abstract suspend fun deleteItem(item: AccountingItem)
 
+    @Query("SELECT * FROM AccountingItem ORDER BY  date LIMIT :limit OFFSET :offset")
+    abstract suspend fun loadPage(offset: Int, limit: Int = 10): List<AccountingItem>
 
-    @Transaction
-    open suspend fun updateGroup(group: AccountingGroup) {
-        updateGroupItem(group.groupItem)
-        group.items.forEach {
-            updateItem(it.copy(groupId = group.groupItem.id))
-        }
-    }
+    @Query("SELECT date FROM AccountingItem GROUP BY date  ORDER By date")
+    abstract suspend fun getAllDates(): List<String>
 
-    @Query("SELECT * FROM AccountingGroupItem WHERE id = :id")
-    abstract suspend fun getGroup(id: Int): AccountingGroup
+    @Query("SELECT * FROM AccountingItem WHERE date=:date")
+    abstract suspend fun getItemsInDate(date: String): List<AccountingItem>
+
+    @Query("SELECT SUM(totalSum) FROM AccountingItem")
+    abstract suspend fun calculateSum(): String
 }

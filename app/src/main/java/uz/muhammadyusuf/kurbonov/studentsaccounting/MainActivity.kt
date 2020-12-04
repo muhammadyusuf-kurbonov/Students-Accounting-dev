@@ -10,7 +10,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.viewinterop.viewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             StudentsAccountingTheme {
                 val model = viewModel<MainViewModel>()
-                model.initRepository(ContextAmbient.current)
+                model.initRepository(AmbientContext.current)
 
                 Surface(color = MaterialTheme.colors.background) {
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -44,13 +44,12 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         val addEditViewModel = viewModel<AddEditViewModel>()
-                        addEditViewModel.initRepository(ContextAmbient.current)
+                        addEditViewModel.initRepository(AmbientContext.current)
 
                         if (screenState.value is ScreenStates.AddEditScreenState)
-                            AddEditScreen(
-                                showState = mutableStateOf(true),
-                                viewModel = addEditViewModel
-                            )
+                            AddEditScreen {
+                                screenState.value = ScreenStates.MainScreenState
+                            }
                     }
                 }
             }
