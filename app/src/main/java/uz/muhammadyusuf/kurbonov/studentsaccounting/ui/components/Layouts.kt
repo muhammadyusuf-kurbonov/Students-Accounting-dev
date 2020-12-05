@@ -2,6 +2,7 @@ package uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components
 
 import androidx.compose.animation.transition
 import androidx.compose.foundation.ScrollableColumn
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,9 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,6 +22,7 @@ import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.animations.CardGoInAnimat
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.bottomCardHeight
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.defaultMargin
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.defaultPadding
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.states.DetailsCardState
 
 @Composable
 fun MainScreenLayout(
@@ -58,31 +58,49 @@ fun MainScreenLayout(
 @Composable
 fun DetailsLayout(
     modifier: Modifier = Modifier,
-    showState: State<Boolean>,
+    showState: MutableState<DetailsCardState>,
+    onDismissRequest: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit = {}
 ) {
-
-    val currentState = remember { mutableStateOf("start") }
-    var draw = true
+    val toState = when (showState.value) {
+        is DetailsCardState.Closing -> DetailsCardState.Closed
+        is DetailsCardState.Opening -> DetailsCardState.Opened
+        is DetailsCardState.Opened,
+        DetailsCardState.Closed -> showState.value
+    }
+    val fromState = when (showState.value) {
+        is DetailsCardState.Opened, DetailsCardState.Closed
+        -> showState.value
+        is DetailsCardState.Opening -> DetailsCardState.Closed
+        is DetailsCardState.Closing -> DetailsCardState.Opened
+    }
     val offset = transition(
         definition = CardGoInAnimation.definition,
-        initState = currentState.value,
-        toState = if (showState.value) "end" else "start"
+        initState = fromState,
+        toState = toState
     ) {
-        if (it == "start") draw = false
+        if (it == DetailsCardState.Closed) {
+            showState.value = DetailsCardState.Closed
+        } else if (it == DetailsCardState.Opened) {
+            showState.value = DetailsCardState.Opened
+        }
     }
 
-
-
-    if (draw || !showState.value) {
-        Box(modifier = Modifier.fillMaxSize()) {
+    if (showState.value !is DetailsCardState.Closed) {
+        Box(
+            modifier = Modifier.fillMaxSize()
+                .clickable(onClick = {
+                    onDismissRequest()
+                })
+        ) {
             Card(
                 modifier = modifier
                     .padding(defaultPadding(), 0.dp)
                     .fillMaxWidth()
                     .height(bottomCardHeight())
-                    .offset(y = bottomCardHeight() * offset[CardGoInAnimation.top])
-                    .align(Alignment.BottomCenter),
+                    .offset(y = bottomCardHeight() * offset[CardGoInAnimation.offset])
+                    .align(Alignment.BottomCenter)
+                    .clickable(onClick = {}),
                 shape = RoundedCornerShape(16.dp, 16.dp),
                 elevation = 25.dp
             ) {
@@ -100,10 +118,7 @@ fun DetailsLayout(
                 }
             }
         }
-        currentState.value = if (showState.value) "end" else "start"
     }
-
-
 }
 
 @Preview

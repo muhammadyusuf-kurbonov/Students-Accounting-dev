@@ -1,6 +1,7 @@
 package uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -18,13 +19,17 @@ import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 import uz.muhammadyusuf.kurbonov.studentsaccounting.R
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.defaultMargin
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.defaultPadding
-import uz.muhammadyusuf.kurbonov.utils.reformatDate
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.prettifyDate
 import kotlin.math.absoluteValue
 
 @Composable
-fun MainListItem(item: AccountingItem) {
+fun MainListItem(
+    item: AccountingItem,
+    onClick: (AccountingItem) -> Unit = {}
+) {
     Card(
-        elevation = 10.dp, modifier = Modifier.fillMaxWidth(),
+        elevation = 4.dp,
+        modifier = Modifier.fillMaxWidth().clickable(onClick = { onClick(item) }),
         shape = RoundedCornerShape(8.dp)
     ) {
         Padding(paddingValues = PaddingValues(defaultMargin())) {
@@ -65,7 +70,7 @@ fun MainListItem(item: AccountingItem) {
                 Text(
                     modifier = Modifier
                         .padding(defaultPadding()),
-                    text = item.date.reformatDate("yyyy-MM-DD", "dd MMM YYYY"),
+                    text = item.date.prettifyDate(),
                     fontStyle = FontStyle.Italic,
                 )
 
@@ -85,7 +90,7 @@ fun MainListItem(item: AccountingItem) {
 
 @Preview(showBackground = true)
 @Composable
-fun previewListItem() {
+fun PreviewListItem() {
 
     Padding(paddingValues = PaddingValues(defaultMargin())) {
         Column {

@@ -26,4 +26,7 @@ abstract class AccountingDao {
 
     @Query("SELECT SUM(totalSum) FROM AccountingItem")
     abstract suspend fun calculateSum(): String
+
+    @Query("SELECT * FROM AccountingItem WHERE id=:id")
+    abstract suspend fun getItem(id: Int): AccountingItem
 }

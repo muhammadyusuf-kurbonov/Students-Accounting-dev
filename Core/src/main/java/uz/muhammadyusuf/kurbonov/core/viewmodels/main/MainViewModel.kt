@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import uz.muhammadyusuf.kurbonov.core.repos.Repository
 import uz.muhammadyusuf.kurbonov.core.repos.RepositoryImpl
 import uz.muhammadyusuf.kurbonov.core.states.AccountingGroupLoadStates
+import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 
 class MainViewModel : ViewModel() {
     private lateinit var repository: Repository
@@ -47,6 +48,10 @@ class MainViewModel : ViewModel() {
         }
 
         return totalSum
+    }
+
+    suspend fun getItem(id: Int): AccountingItem {
+        return repository.getItem(id)
     }
 
 }

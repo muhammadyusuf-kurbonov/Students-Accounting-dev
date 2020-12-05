@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.State
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
@@ -33,23 +32,26 @@ import uz.muhammadyusuf.kurbonov.defaultresources.ErrorPage
 import uz.muhammadyusuf.kurbonov.defaultresources.LoadingPage
 import uz.muhammadyusuf.kurbonov.defaultresources.R
 import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
-import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.MainListItem
-import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.Padding
-import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.Spinner
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.*
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.states.DetailsCardState
 import uz.muhammadyusuf.kurbonov.utils.formatAsDate
 import uz.muhammadyusuf.kurbonov.utils.openDatePickerDialog
-import uz.muhammadyusuf.kurbonov.utils.reformatDate
 
 @ExperimentalCoroutinesApi
 @Composable
 fun MainScreen(
     listState: State<AccountingGroupLoadStates>,
-    onNewPartRequest: () -> Unit = {}
+    onNewPartRequest: () -> Unit = {},
+    onItemClick: (item: AccountingItem) -> Unit = {}
 ) {
     when (listState.value) {
+
+        // ===============================  LOADING...  =======================================
         AccountingGroupLoadStates.LoadingState -> LoadingPage(
             modifier = Modifier.fillMaxSize()
         )
+
+        // ================================  DATA  ============================================
         is AccountingGroupLoadStates.Data -> {
 
             Surface(color = MaterialTheme.colors.surface) {
@@ -58,24 +60,15 @@ fun MainScreen(
                     LazyColumn {
 
                         item {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    text = "Balance",
-                                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                                        .padding(defaultPadding())
-                                )
+                            val model = viewModel<MainViewModel>()
+                            model.initRepository(AmbientContext.current)
 
-                                val model = viewModel<MainViewModel>()
-                                model.initRepository(AmbientContext.current)
+                            val sumState = model.getTotalSum().collectAsState()
 
-                                Text(
-                                    text = model.getTotalSum().collectAsState().value.toString(),
-                                    style = MaterialTheme.typography.h4,
-                                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(
-                                        defaultMargin()
-                                    )
-                                )
-                            }
+                            BalanceReport(
+                                modifier = Modifier.fillMaxWidth(),
+                                sumState = sumState
+                            )
                         }
 
                         itemsIndexed(
@@ -85,60 +78,68 @@ fun MainScreen(
                                 onNewPartRequest()
                             Padding(paddingValues = PaddingValues(defaultMargin()))
                             {
-                                MainListItem(item = item)
+                                MainListItem(item = item, onClick = {
+                                    onItemClick(it)
+                                })
                             }
                         }
                     }
                 }
             }
-
-
         }
+
+
+        // ================================  EMPTY  ===========================================
         AccountingGroupLoadStates.EmptyList -> EmptyPage(
             modifier = Modifier.fillMaxSize()
         )
+
+
+        // ================================  ERROR  ============================================
         is AccountingGroupLoadStates.Error -> ErrorPage()
     }
 }
 
-//@Composable
-//fun DetailsScreen(
-//    showState: MutableState<Boolean>,
-//    item: AccountingGroup
-//) {
-//
-//    DetailsLayout(showState = showState) {
-//        Text(
-//            text = stringResource(
-//                id = R.string.details
-//            ),
-//            style = MaterialTheme.typography.h6,
-//            modifier = Modifier.fillMaxWidth().padding(defaultPadding())
-//        )
-//
-//        Text(
-//            text = "Date ${item.groupItem.date.formatAsDate()}",
-//            modifier = Modifier.fillMaxWidth().padding(defaultMargin())
-//        )
-//
-//        LazyColumnFor(items = item.items) {
-//
-//            Row(modifier = Modifier.fillMaxWidth().padding(defaultPadding())) {
-//                Text(text = it.itemName)
-//                Spacer(modifier = Modifier.weight(1f))
-//                Text(text = it.totalSum.toString())
-//            }
-//
-//            Divider()
-//        }
-//
-//        Button(onClick = { showState.value = false }) {
-//            Text(text = stringResource(id = R.string.close))
-//        }
-//    }
-//}
-//
-//
+@Composable
+fun DetailsScreen(
+    item: AccountingItem?,
+    onDismissRequest: () -> Unit
+) {
+
+    val showState = mutableStateOf<DetailsCardState>(DetailsCardState.Opening)
+
+    DetailsLayout(showState = showState,
+        onDismissRequest = {
+            showState.value = DetailsCardState.Closing
+        }) {
+        Text(
+            text = stringResource(
+                id = R.string.details
+            ),
+            style = MaterialTheme.typography.h4,
+            modifier = Modifier.fillMaxWidth().padding(defaultPadding())
+        )
+
+        Text(
+            text = item?.itemDescription ?: stringResource(id = R.string.loading_label),
+            modifier = Modifier.fillMaxWidth().padding(defaultMargin()),
+            style = MaterialTheme.typography.h6,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = if (item != null) "Date ${item.date.prettifyDate()}"
+            else stringResource(id = R.string.loading_label),
+            modifier = Modifier.fillMaxWidth().padding(defaultMargin())
+        )
+
+        Button(onClick = {
+            showState.value = DetailsCardState.Closing
+        }) {
+            Text(text = stringResource(id = R.string.close))
+        }
+    }
+}
+
 
 @Composable
 fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
@@ -177,7 +178,7 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
                     OutlinedTextField(
                         value = date.value,
                         onValueChange = {},
-                        label = { Text(text = "Date") },
+                        label = { Text(text = stringResource(uz.muhammadyusuf.kurbonov.studentsaccounting.R.string.date)) },
                         leadingIcon = {
                             val context = AmbientContext.current
                             Image(
@@ -200,7 +201,9 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
 
                     OutlinedTextField(
                         value = description.value,
-                        onValueChange = { description.value = it },
+                        onValueChange = {
+                            description.value = it
+                        },
                         label = { Text(text = stringResource(id = R.string.description)) }
                     )
 
@@ -221,7 +224,7 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
                                 model.submit(
                                     item = AccountingItem(
                                         itemDescription = description.value,
-                                        date = date.value.reformatDate("dd MMM yyyy", "yyyy-MM-DD"),
+                                        date = date.value.dateToSQLFormat(),
                                         totalSum = sum.value * if (itemType.value == "in") 1 else -1
                                     )
                                 ) {
@@ -229,7 +232,10 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
                                 }
                             }
                         }) {
-                        Text(text = if (sendingState.value) "Sending ..." else "Submit")
+                        Text(
+                            text = if (sendingState.value) stringResource(uz.muhammadyusuf.kurbonov.studentsaccounting.R.string.sending_label)
+                            else stringResource(uz.muhammadyusuf.kurbonov.studentsaccounting.R.string.submit_label)
+                        )
                     }
                 }
             }

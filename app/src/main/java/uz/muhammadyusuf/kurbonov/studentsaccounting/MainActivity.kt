@@ -13,10 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import uz.muhammadyusuf.kurbonov.core.viewmodels.add_edit.AddEditViewModel
 import uz.muhammadyusuf.kurbonov.core.viewmodels.main.MainViewModel
+import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.AddEditScreen
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.DetailsScreen
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.MainScreen
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.StudentsAccountingTheme
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.MainScreenLayout
@@ -40,16 +44,33 @@ class MainActivity : AppCompatActivity() {
                             screenState.value = ScreenStates.AddEditScreenState()
                         }) {
                             val listState = model.getAllData().collectAsState()
-                            MainScreen(listState = listState)
+                            MainScreen(listState = listState, onItemClick = {
+                                screenState.value = ScreenStates.DetailsScreenState(it.id)
+                            })
                         }
 
                         val addEditViewModel = viewModel<AddEditViewModel>()
                         addEditViewModel.initRepository(AmbientContext.current)
 
-                        if (screenState.value is ScreenStates.AddEditScreenState)
-                            AddEditScreen {
-                                screenState.value = ScreenStates.MainScreenState
+                        when (screenState.value) {
+                            is ScreenStates.AddEditScreenState -> {
+                                AddEditScreen {
+                                    screenState.value = ScreenStates.MainScreenState
+                                }
                             }
+                            is ScreenStates.DetailsScreenState -> {
+                                val itemState = mutableStateOf<AccountingItem?>(null)
+
+                                lifecycleScope.launch {
+                                    val detailsScreenState = screenState.value
+                                            as ScreenStates.DetailsScreenState
+                                    itemState.value = model.getItem(detailsScreenState.id)
+                                }
+                                DetailsScreen(item = itemState.value) {
+                                    screenState.value = ScreenStates.MainScreenState
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -3,9 +3,19 @@ package uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
+import uz.muhammadyusuf.kurbonov.studentsaccounting.R
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.defaultMargin
+import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.defaultPadding
 
 @Composable
 fun <T> Spinner(
@@ -42,4 +52,23 @@ fun <T> Spinner(
         },
         modifier
     )
+}
+
+@Composable
+fun BalanceReport(modifier: Modifier = Modifier, sumState: State<Int?>) {
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(R.string.balance_label),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+                .padding(defaultPadding())
+        )
+
+        Text(
+            text = sumState.value.toString(),
+            style = MaterialTheme.typography.h4,
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(
+                defaultMargin()
+            )
+        )
+    }
 }

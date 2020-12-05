@@ -11,5 +11,7 @@ internal interface Repository {
 
     suspend fun getFirstPart(): List<AccountingItem>
 
+    suspend fun getItem(id: Int): AccountingItem
+
     suspend fun calculateSum(): Int
 }
