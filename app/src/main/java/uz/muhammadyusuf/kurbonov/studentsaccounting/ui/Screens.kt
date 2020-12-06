@@ -7,7 +7,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
@@ -35,6 +38,8 @@ import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.*
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.states.DetailsCardState
 import uz.muhammadyusuf.kurbonov.utils.formatAsDate
 import uz.muhammadyusuf.kurbonov.utils.openDatePickerDialog
+import java.text.NumberFormat
+import java.util.*
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -218,16 +223,14 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
                         label = { Text(text = stringResource(id = R.string.description)) }
                     )
 
+                    val formatter = NumberFormat.getCurrencyInstance().apply {
+                        maximumFractionDigits = 2
+                        currency = Currency.getInstance("UZS")
+                    }
                     OutlinedTextField(
-                        value = String.format("%.2f", sum.value),
+                        value = formatter.format(sum.value),
                         onValueChange = {
-                            sum.value = run {
-                                try {
-                                    return@run it.replace(",", ".").toDouble()
-                                } catch (e: Exception) {
-                                    return@run 0.0
-                                }
-                            }
+                            sum.value = formatter.parse(it)?.toDouble() ?: 0.0
                         },
                         label = { Text(text = stringResource(id = R.string.description)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
