@@ -55,7 +55,10 @@ class MainActivity : AppCompatActivity() {
 
                         when (screenState.value) {
                             is ScreenStates.AddEditScreenState -> {
-                                AddEditScreen {
+                                AddEditScreen(
+                                    (screenState.value
+                                            as ScreenStates.AddEditScreenState).item
+                                ) {
                                     screenState.value = ScreenStates.MainScreenState
                                 }
                             }
@@ -68,7 +71,9 @@ class MainActivity : AppCompatActivity() {
                                     itemState.value = model.getItem(detailsScreenState.id)
                                 }
 
-                                DetailsScreen(item = itemState.value) {
+                                DetailsScreen(item = itemState.value, onEdit = {
+                                    screenState.value = ScreenStates.AddEditScreenState(it)
+                                }) {
                                     screenState.value = ScreenStates.MainScreenState
                                 }
                             }

@@ -1,6 +1,7 @@
 package uz.muhammadyusuf.kurbonov.core.viewmodels.add_edit
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,7 @@ import uz.muhammadyusuf.kurbonov.core.repos.Repository
 import uz.muhammadyusuf.kurbonov.core.repos.RepositoryImpl
 import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 
-class AddEditViewModel(private val id: Int = -1) : ViewModel() {
+class AddEditViewModel : ViewModel() {
     private lateinit var repository: Repository
 
     private val itemsData = MutableStateFlow<List<AccountingItem>>(
@@ -36,7 +37,11 @@ class AddEditViewModel(private val id: Int = -1) : ViewModel() {
 
     fun submit(item: AccountingItem, onFinish: () -> Unit = {}) {
         viewModelScope.launch {
-            repository.insertNewItem(item)
+            Log.d("TAG", "submit: item is $item")
+            if (item.id == 0)
+                repository.insertNewItem(item)
+            else if (item.id > 0)
+                repository.updateItem(item)
             onFinish()
         }
     }

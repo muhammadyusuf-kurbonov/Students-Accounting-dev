@@ -9,6 +9,8 @@ internal interface Repository {
 
     suspend fun insertNewItem(item: AccountingItem)
 
+    suspend fun updateItem(item: AccountingItem)
+
     suspend fun getFirstPart(): List<AccountingItem>
 
     suspend fun getItem(id: Int): AccountingItem

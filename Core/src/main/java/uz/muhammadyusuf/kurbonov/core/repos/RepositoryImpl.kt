@@ -15,6 +15,9 @@ internal class RepositoryImpl : Repository {
     override suspend fun insertNewItem(item: AccountingItem) =
         database.getAccountingObject().insertNewItem(item)
 
+    override suspend fun updateItem(item: AccountingItem) =
+        database.getAccountingObject().updateItem(item)
+
     override suspend fun getFirstPart(): List<AccountingItem> =
         database.getAccountingObject().loadPage(0, 30)
 

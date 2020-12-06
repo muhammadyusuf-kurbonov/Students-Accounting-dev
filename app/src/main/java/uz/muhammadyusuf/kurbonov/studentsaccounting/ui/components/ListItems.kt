@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -25,11 +26,13 @@ import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.defaultPadding
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.prettifyDate
 import kotlin.math.absoluteValue
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainListItem(
     item: AccountingItem,
     onClick: (AccountingItem) -> Unit = {}
 ) {
+
     Card(
         elevation = 4.dp,
         modifier = Modifier
@@ -94,6 +97,7 @@ fun MainListItem(
 
 
             }
+
         }
     }
 }

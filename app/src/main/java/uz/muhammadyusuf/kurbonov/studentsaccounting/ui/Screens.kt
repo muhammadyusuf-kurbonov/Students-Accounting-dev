@@ -107,6 +107,7 @@ fun MainScreen(
 @Composable
 fun DetailsScreen(
     item: AccountingItem?,
+    onEdit: (AccountingItem) -> Unit = {},
     onClosed: () -> Unit = {}
 ) {
 
@@ -121,14 +122,20 @@ fun DetailsScreen(
         onClosed = onClosed
     ) {
 
-        Text(
-            text = stringResource(
-                id = R.string.details
-            ),
-            style = MaterialTheme.typography.h4,
-            modifier = Modifier.fillMaxWidth().padding(defaultPadding())
-        )
-
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = stringResource(
+                    id = R.string.details
+                ),
+                style = MaterialTheme.typography.h4,
+                modifier = Modifier.padding(defaultPadding())
+            )
+            TextButton(onClick = {
+                showState.value = DetailsCardState.Closing
+            }) {
+                Text(text = "x", color = MaterialTheme.colors.onBackground)
+            }
+        }
         Text(
             text = item?.itemDescription ?: stringResource(id = R.string.loading_label),
             modifier = Modifier.fillMaxWidth().padding(defaultMargin()),
@@ -148,17 +155,20 @@ fun DetailsScreen(
             style = MaterialTheme.typography.subtitle1
         )
 
-        Button(onClick = {
-            showState.value = DetailsCardState.Closing
-        }) {
-            Text(text = stringResource(id = R.string.close))
+        if (item != null) {
+            Button(onClick = {
+                showState.value = DetailsCardState.Closing
+                onEdit(item)
+            }, modifier = Modifier.padding(defaultPadding())) {
+                Text(text = "Edit", style = MaterialTheme.typography.button)
+            }
         }
     }
 }
 
 
 @Composable
-fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
+fun AddEditScreen(item: AccountingItem? = null, onDismissRequest: () -> Unit = {}) {
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
             modifier = Modifier.padding(defaultPadding()),
@@ -171,6 +181,13 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
             val sendingState = remember { mutableStateOf(false) }
 
             val itemType = remember { mutableStateOf("in") }
+
+            if (item != null) {
+                description.value = item.itemDescription
+                sum.value = item.totalSum
+                date.value = item.date.prettifyDate()
+            }
+
 
             Padding(paddingValues = PaddingValues(defaultMargin())) {
                 Column {
@@ -245,6 +262,7 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
                             if (!sendingState.value) {
                                 model.submit(
                                     item = AccountingItem(
+                                        id = item?.id ?: 0,
                                         itemDescription = description.value,
                                         date = date.value.dateToSQLFormat(),
                                         totalSum = sum.value * if (itemType.value == "in") 1.0 else -1.0
