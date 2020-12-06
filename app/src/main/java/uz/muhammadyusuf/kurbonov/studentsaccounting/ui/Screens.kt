@@ -108,6 +108,7 @@ fun MainScreen(
 fun DetailsScreen(
     item: AccountingItem?,
     onEdit: (AccountingItem) -> Unit = {},
+    onDelete: (AccountingItem) -> Unit = {},
     onClosed: () -> Unit = {}
 ) {
 
@@ -161,6 +162,13 @@ fun DetailsScreen(
                 onEdit(item)
             }, modifier = Modifier.padding(defaultPadding())) {
                 Text(text = "Edit", style = MaterialTheme.typography.button)
+            }
+
+            Button(onClick = {
+                showState.value = DetailsCardState.Closing
+                onDelete(item)
+            }, modifier = Modifier.padding(defaultPadding())) {
+                Text(text = "Delete", style = MaterialTheme.typography.button)
             }
         }
     }

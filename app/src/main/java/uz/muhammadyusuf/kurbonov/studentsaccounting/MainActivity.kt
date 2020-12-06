@@ -71,9 +71,14 @@ class MainActivity : AppCompatActivity() {
                                     itemState.value = model.getItem(detailsScreenState.id)
                                 }
 
+                                val dialogState = remember { mutableStateOf(true) }
+
                                 DetailsScreen(item = itemState.value, onEdit = {
                                     screenState.value = ScreenStates.AddEditScreenState(it)
-                                }) {
+                                },
+                                    onDelete = {
+                                        // TODO
+                                    }) {
                                     screenState.value = ScreenStates.MainScreenState
                                 }
                             }
