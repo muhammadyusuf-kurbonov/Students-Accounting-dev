@@ -1,6 +1,7 @@
 package uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,7 +32,14 @@ fun MainListItem(
 ) {
     Card(
         elevation = 4.dp,
-        modifier = Modifier.fillMaxWidth().clickable(onClick = { onClick(item) }),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = { onClick(item) })
+            .background(
+                if (item.totalSum < 0) Color.Red.copy(alpha = 0.42f)
+                else Color.Green.copy(alpha = 0.42f),
+                shape = RoundedCornerShape(8.dp)
+            ).alpha(0.9f),
         shape = RoundedCornerShape(8.dp)
     ) {
         Padding(paddingValues = PaddingValues(defaultMargin())) {

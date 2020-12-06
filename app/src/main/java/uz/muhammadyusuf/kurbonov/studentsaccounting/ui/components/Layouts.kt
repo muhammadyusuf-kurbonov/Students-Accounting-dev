@@ -13,10 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.gesture.tapGestureFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import uz.muhammadyusuf.kurbonov.studentsaccounting.R
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.animations.CardGoInAnimation
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.bottomCardHeight
@@ -48,7 +50,7 @@ fun MainScreenLayout(
         },
         backgroundColor = MaterialTheme.colors.surface
     ) {
-        Box(modifier = Modifier.padding(defaultPadding()).fillMaxSize()) {
+        Box(modifier = Modifier.padding(defaultPadding(), bottom = 56.dp).fillMaxSize()) {
             content()
         }
     }
@@ -93,9 +95,9 @@ fun DetailsLayout(
     if (showState.value !is DetailsCardState.Closed) {
         Box(
             modifier = Modifier.fillMaxSize()
-                .clickable(onClick = {
+                .tapGestureFilter {
                     onDismissRequest()
-                })
+                }
         ) {
             Card(
                 modifier = modifier
@@ -104,7 +106,7 @@ fun DetailsLayout(
                     .height(bottomCardHeight())
                     .offset(y = bottomCardHeight() * offset[CardGoInAnimation.offset])
                     .align(Alignment.BottomCenter)
-                    .clickable(onClick = {}),
+                    .clickable(onClick = {}).zIndex(2.0f),
                 shape = RoundedCornerShape(16.dp, 16.dp),
                 elevation = 25.dp
             ) {
