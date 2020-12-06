@@ -98,7 +98,7 @@ fun PreviewListItem() {
                 AccountingItem(
                     author = "Muhammadyusuf",
                     itemDescription = "Test item #1",
-                    totalSum = 530
+                    totalSum = 530.0
                 )
             )
 
@@ -106,7 +106,7 @@ fun PreviewListItem() {
                 AccountingItem(
                     author = "Fayoziddin",
                     itemDescription = "Test item #2",
-                    totalSum = -230
+                    totalSum = -230.0
                 )
             )
         }

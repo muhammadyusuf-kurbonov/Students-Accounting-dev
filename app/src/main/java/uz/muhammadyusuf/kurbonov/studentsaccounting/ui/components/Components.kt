@@ -55,7 +55,7 @@ fun <T> Spinner(
 }
 
 @Composable
-fun BalanceReport(modifier: Modifier = Modifier, sumState: State<Int?>) {
+fun BalanceReport(modifier: Modifier = Modifier, sumState: State<Double?>) {
     Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.balance_label),

@@ -18,7 +18,7 @@ class MainViewModel : ViewModel() {
     private val allData = MutableStateFlow<AccountingGroupLoadStates>(
         AccountingGroupLoadStates.LoadingState
     )
-    private val totalSum = MutableStateFlow<Int?>(
+    private val totalSum = MutableStateFlow<Double?>(
         null
     )
 
@@ -39,7 +39,7 @@ class MainViewModel : ViewModel() {
         return allData
     }
 
-    fun getTotalSum(): StateFlow<Int?> {
+    fun getTotalSum(): StateFlow<Double?> {
 
         viewModelScope.launch {
             val sum = repository.calculateSum()

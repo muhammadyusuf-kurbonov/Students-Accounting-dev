@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
@@ -40,7 +39,7 @@ import uz.muhammadyusuf.kurbonov.utils.openDatePickerDialog
 @ExperimentalCoroutinesApi
 @Composable
 fun MainScreen(
-    listState: State<AccountingGroupLoadStates>,
+    listState: androidx.compose.runtime.State<AccountingGroupLoadStates>,
     onNewPartRequest: () -> Unit = {},
     onItemClick: (item: AccountingItem) -> Unit = {}
 ) {
@@ -103,15 +102,20 @@ fun MainScreen(
 @Composable
 fun DetailsScreen(
     item: AccountingItem?,
-    onDismissRequest: () -> Unit
+    onClosed: () -> Unit = {}
 ) {
 
-    val showState = mutableStateOf<DetailsCardState>(DetailsCardState.Opening)
+    val showState = remember { mutableStateOf<DetailsCardState>(DetailsCardState.Opening) }
 
-    DetailsLayout(showState = showState,
+
+    DetailsLayout(
+        showState = showState,
         onDismissRequest = {
             showState.value = DetailsCardState.Closing
-        }) {
+        },
+        onClosed = onClosed
+    ) {
+
         Text(
             text = stringResource(
                 id = R.string.details
@@ -126,10 +130,17 @@ fun DetailsScreen(
             style = MaterialTheme.typography.h6,
             fontWeight = FontWeight.Bold
         )
+
         Text(
             text = if (item != null) "Date ${item.date.prettifyDate()}"
             else stringResource(id = R.string.loading_label),
             modifier = Modifier.fillMaxWidth().padding(defaultMargin())
+        )
+
+        Text(
+            text = stringResource(uz.muhammadyusuf.kurbonov.studentsaccounting.R.string.sum_prefix) + item?.totalSum,
+            modifier = Modifier.fillMaxWidth().padding(defaultMargin()),
+            style = MaterialTheme.typography.subtitle1
         )
 
         Button(onClick = {
@@ -151,7 +162,7 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
 
             val date = remember { mutableStateOf(System.currentTimeMillis().formatAsDate()) }
             val description = remember { mutableStateOf("") }
-            val sum = remember { mutableStateOf(0) }
+            val sum = remember { mutableStateOf(0.0) }
             val sendingState = remember { mutableStateOf(false) }
 
             val itemType = remember { mutableStateOf("in") }
@@ -208,8 +219,16 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
                     )
 
                     OutlinedTextField(
-                        value = sum.value.toString(),
-                        onValueChange = { sum.value = if (it.isEmpty()) 0 else it.toInt() },
+                        value = String.format("%.2f", sum.value),
+                        onValueChange = {
+                            sum.value = run {
+                                try {
+                                    return@run it.replace(",", ".").toDouble()
+                                } catch (e: Exception) {
+                                    return@run 0.0
+                                }
+                            }
+                        },
                         label = { Text(text = stringResource(id = R.string.description)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
@@ -225,7 +244,7 @@ fun AddEditScreen(onDismissRequest: () -> Unit = {}) {
                                     item = AccountingItem(
                                         itemDescription = description.value,
                                         date = date.value.dateToSQLFormat(),
-                                        totalSum = sum.value * if (itemType.value == "in") 1 else -1
+                                        totalSum = sum.value * if (itemType.value == "in") 1.0 else -1.0
                                     )
                                 ) {
                                     onDismissRequest()

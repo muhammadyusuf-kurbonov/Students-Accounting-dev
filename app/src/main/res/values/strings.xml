@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Student\'s Accounting</string>
     <string name="balance_label">Balance</string>
-    <string name="sending_label">Sending ...</string>
+    <string name="sending_label">Sending …</string>
     <string name="submit_label">Submit</string>
     <string name="date">Date</string>
+    <string name="sum_prefix">Sum: </string>
 </resources>

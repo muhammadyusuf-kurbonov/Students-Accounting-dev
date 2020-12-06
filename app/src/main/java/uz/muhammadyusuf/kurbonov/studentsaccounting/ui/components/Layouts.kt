@@ -60,6 +60,8 @@ fun DetailsLayout(
     modifier: Modifier = Modifier,
     showState: MutableState<DetailsCardState>,
     onDismissRequest: () -> Unit = {},
+    onOpen: () -> Unit = {},
+    onClosed: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit = {}
 ) {
     val toState = when (showState.value) {
@@ -81,8 +83,10 @@ fun DetailsLayout(
     ) {
         if (it == DetailsCardState.Closed) {
             showState.value = DetailsCardState.Closed
+            onClosed()
         } else if (it == DetailsCardState.Opened) {
             showState.value = DetailsCardState.Opened
+            onOpen()
         }
     }
 
@@ -123,7 +127,7 @@ fun DetailsLayout(
 
 @Preview
 @Composable
-fun previewMainScreen() {
+fun PreviewMainScreen() {
     MainScreenLayout {
         Text(text = "Hallo")
     }

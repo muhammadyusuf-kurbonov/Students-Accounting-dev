@@ -9,7 +9,7 @@ data class AccountingItem(
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0,
     var itemDescription: String = "",
-    var totalSum: Int = 0,
+    var totalSum: Double = 0.0,
     var author: String = "Muhammadyusuf",
     var date: String = System.currentTimeMillis().formatAsDate("yyyy-MM-DD")
 )

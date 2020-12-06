@@ -9,6 +9,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.setContent
@@ -59,13 +60,14 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                             is ScreenStates.DetailsScreenState -> {
-                                val itemState = mutableStateOf<AccountingItem?>(null)
+                                val itemState = remember { mutableStateOf<AccountingItem?>(null) }
 
                                 lifecycleScope.launch {
                                     val detailsScreenState = screenState.value
                                             as ScreenStates.DetailsScreenState
                                     itemState.value = model.getItem(detailsScreenState.id)
                                 }
+
                                 DetailsScreen(item = itemState.value) {
                                     screenState.value = ScreenStates.MainScreenState
                                 }
