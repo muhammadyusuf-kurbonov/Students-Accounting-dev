@@ -22,6 +22,10 @@ fun String.reformatDate(oldFormat: String, newFormat: String): String {
     return result
 }
 
+fun String.dateToSQLFormat() = reformatDate("dd MMM yyyy", "yyyy-MM-DD")
+
+fun String.prettifyDate() = reformatDate("yyyy-MM-DD", "dd MMM YYYY")
+
 suspend fun openDatePickerDialog(context: Context) = suspendCoroutine<Long> {
     var date = System.currentTimeMillis()
     val calendar = Calendar.getInstance()
