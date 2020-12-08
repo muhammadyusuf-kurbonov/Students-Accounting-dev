@@ -165,7 +165,6 @@ fun DetailsScreen(
             }
 
             Button(onClick = {
-                showState.value = DetailsCardState.Closing
                 onDelete(item)
             }, modifier = Modifier.padding(defaultPadding())) {
                 Text(text = "Delete", style = MaterialTheme.typography.button)
@@ -192,7 +191,8 @@ fun AddEditScreen(item: AccountingItem? = null, onDismissRequest: () -> Unit = {
 
             if (item != null) {
                 description.value = item.itemDescription
-                sum.value = item.totalSum
+                sum.value = kotlin.math.abs(item.totalSum)
+                itemType.value = if (item.totalSum > 0) "in" else "out"
                 date.value = item.date.prettifyDate()
             }
 
@@ -237,7 +237,8 @@ fun AddEditScreen(item: AccountingItem? = null, onDismissRequest: () -> Unit = {
                                     BlendMode.SrcAtop
                                 )
                             )
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(defaultPadding())
                     )
 
                     OutlinedTextField(
@@ -245,12 +246,13 @@ fun AddEditScreen(item: AccountingItem? = null, onDismissRequest: () -> Unit = {
                         onValueChange = {
                             description.value = it
                         },
-                        label = { Text(text = stringResource(id = R.string.description)) }
+                        label = { Text(text = stringResource(id = R.string.description)) },
+                        modifier = Modifier.fillMaxWidth().padding(defaultPadding())
                     )
 
                     val formatter = NumberFormat.getCurrencyInstance().apply {
-                        maximumFractionDigits = 2
-                        currency = Currency.getInstance("UZS")
+                        maximumFractionDigits = 0
+                        currency = Currency.getInstance("USD")
                     }
                     OutlinedTextField(
                         value = formatter.format(sum.value),
@@ -258,7 +260,8 @@ fun AddEditScreen(item: AccountingItem? = null, onDismissRequest: () -> Unit = {
                             sum.value = formatter.parse(it)?.toDouble() ?: 0.0
                         },
                         label = { Text(text = stringResource(id = R.string.description)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth().padding(defaultPadding())
                     )
 
                     val model = viewModel<AddEditViewModel>()

@@ -1,18 +1,16 @@
 package uz.muhammadyusuf.kurbonov.studentsaccounting
 
+import android.R
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,17 +42,20 @@ class MainActivity : AppCompatActivity() {
                         MainScreenLayout(onFABClick = {
                             screenState.value = ScreenStates.AddEditScreenState()
                         }) {
-                            val listState = model.getAllData().collectAsState()
+                            val coroutineScope = rememberCoroutineScope()
+                            val listState =
+                                model.getAllData().collectAsState(coroutineScope.coroutineContext)
+
                             MainScreen(listState = listState, onItemClick = {
                                 screenState.value = ScreenStates.DetailsScreenState(it.id)
                             })
                         }
 
-                        val addEditViewModel = viewModel<AddEditViewModel>()
-                        addEditViewModel.initRepository(AmbientContext.current)
 
                         when (screenState.value) {
                             is ScreenStates.AddEditScreenState -> {
+                                val addEditViewModel = viewModel<AddEditViewModel>()
+                                addEditViewModel.initRepository(AmbientContext.current)
                                 AddEditScreen(
                                     (screenState.value
                                             as ScreenStates.AddEditScreenState).item
@@ -71,13 +72,35 @@ class MainActivity : AppCompatActivity() {
                                     itemState.value = model.getItem(detailsScreenState.id)
                                 }
 
-                                val dialogState = remember { mutableStateOf(true) }
+                                val dialogShow = remember { mutableStateOf(false) }
+
+                                if (dialogShow.value) {
+                                    AlertDialog(onDismissRequest = { dialogShow.value = false },
+                                        buttons = {
+                                            TextButton(onClick = { dialogShow.value = false }) {
+                                                Text(text = stringResource(id = R.string.cancel))
+                                            }
+                                            TextButton(onClick = {
+                                                lifecycleScope.launch {
+                                                    if (itemState.value != null)
+                                                        model.deleteItem(itemState.value!!)
+                                                    dialogShow.value = false
+                                                    screenState.value = ScreenStates.MainScreenState
+                                                }
+                                            }) {
+                                                Text(text = stringResource(id = R.string.ok))
+                                            }
+                                        },
+                                        text = {
+                                            Text(text = getString(uz.muhammadyusuf.kurbonov.studentsaccounting.R.string.confirm_msg))
+                                        })
+                                }
 
                                 DetailsScreen(item = itemState.value, onEdit = {
                                     screenState.value = ScreenStates.AddEditScreenState(it)
                                 },
                                     onDelete = {
-                                        // TODO
+                                        dialogShow.value = true
                                     }) {
                                     screenState.value = ScreenStates.MainScreenState
                                 }

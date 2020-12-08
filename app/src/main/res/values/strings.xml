@@ -5,4 +5,5 @@
     <string name="submit_label">Submit</string>
     <string name="date">Date</string>
     <string name="sum_prefix">Sum: </string>
+    <string name="confirm_msg">Are you sure to delete this record?</string>
 </resources>

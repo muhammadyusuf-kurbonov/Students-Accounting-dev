@@ -54,4 +54,8 @@ class MainViewModel : ViewModel() {
         return repository.getItem(id)
     }
 
+    suspend fun deleteItem(item: AccountingItem) {
+        repository.deleteItem(item)
+    }
+
 }

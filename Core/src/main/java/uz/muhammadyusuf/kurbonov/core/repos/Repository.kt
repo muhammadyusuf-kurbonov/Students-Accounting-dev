@@ -16,4 +16,6 @@ internal interface Repository {
     suspend fun getItem(id: Int): AccountingItem
 
     suspend fun calculateSum(): Double
+
+    suspend fun deleteItem(item: AccountingItem)
 }

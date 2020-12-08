@@ -26,4 +26,7 @@ internal class RepositoryImpl : Repository {
 
     override suspend fun calculateSum(): Double =
         database.getAccountingObject().calculateSum().toDouble()
+
+    override suspend fun deleteItem(item: AccountingItem) =
+        database.getAccountingObject().deleteItem(item)
 }
