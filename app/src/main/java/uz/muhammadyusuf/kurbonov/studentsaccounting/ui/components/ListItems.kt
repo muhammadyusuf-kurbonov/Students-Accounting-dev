@@ -16,12 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
-import uz.muhammadyusuf.kurbonov.studentsaccounting.R
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.defaultMargin
-import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.defaultPadding
 import uz.muhammadyusuf.kurbonov.utils.prettifyDate
 import kotlin.math.absoluteValue
 
@@ -46,22 +45,46 @@ fun MainListItem(
         Padding(paddingValues = PaddingValues(defaultMargin())) {
 
             Column(modifier = Modifier.align(Alignment.CenterStart)) {
-                Text(
+                Row {
+                    Text(
+                        modifier = Modifier
+                            .padding(defaultPadding()),
+                        text = item.date.prettifyDate(),
+                        fontStyle = FontStyle.Italic,
+                    )
+
+                }
+
+                Row(
                     modifier = Modifier
-                        .padding(defaultPadding()),
-                    text = item.itemDescription,
-                    style = MaterialTheme.typography.h6,
-                    fontStyle = FontStyle.Italic,
-                    fontWeight = FontWeight.Bold
-                )
+                        .fillMaxWidth()
+                        .padding(defaultPadding())
+                ) {
 
-                Text(
-                    modifier = Modifier.padding(defaultPadding()),
-                    text = item.author
-                )
-            }
+                    Text(
+                        modifier = Modifier
+                            .padding(defaultPadding())
+                            .weight(2.0f),
+                        text = item.itemDescription,
+                        style = MaterialTheme.typography.h6,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Bold,
+                        softWrap = true,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        modifier = Modifier
+                            .padding(defaultPadding())
+                            .weight(1.0f),
+                        text = item.totalSum.toString(),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.subtitle1
+                    )
+                }
 
-            Column(modifier = Modifier.align(Alignment.CenterEnd)) {
+
+
                 Row(modifier = Modifier.weight(1f)) {
                     Text(
                         modifier = Modifier.padding(defaultPadding()),
@@ -77,25 +100,7 @@ fun MainListItem(
                         modifier = Modifier.align(Alignment.CenterVertically)
                     )
                 }
-
-                Text(
-                    modifier = Modifier
-                        .padding(defaultPadding()),
-                    text = item.date.prettifyDate(),
-                    fontStyle = FontStyle.Italic,
-                )
-
-                Text(
-                    modifier = Modifier
-                        .padding(defaultPadding()),
-                    text = item.totalSum.toString(),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.subtitle1
-                )
-
-
             }
-
         }
     }
 }
@@ -108,7 +113,6 @@ fun PreviewListItem() {
         Column {
             MainListItem(
                 AccountingItem(
-                    author = "Muhammadyusuf",
                     itemDescription = "Test item #1",
                     totalSum = 530.0
                 )
@@ -116,7 +120,6 @@ fun PreviewListItem() {
 
             MainListItem(
                 AccountingItem(
-                    author = "Fayoziddin",
                     itemDescription = "Test item #2",
                     totalSum = -230.0
                 )

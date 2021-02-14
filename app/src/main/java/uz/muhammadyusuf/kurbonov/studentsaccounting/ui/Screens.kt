@@ -22,25 +22,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.compose.ui.window.Dialog
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import uz.muhammadyusuf.kurbonov.core.states.AccountingGroupLoadStates
 import uz.muhammadyusuf.kurbonov.core.viewmodels.add_edit.AddEditViewModel
 import uz.muhammadyusuf.kurbonov.core.viewmodels.main.MainViewModel
 import uz.muhammadyusuf.kurbonov.defaultresources.EmptyPage
 import uz.muhammadyusuf.kurbonov.defaultresources.ErrorPage
 import uz.muhammadyusuf.kurbonov.defaultresources.LoadingPage
-import uz.muhammadyusuf.kurbonov.defaultresources.R
 import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components.*
 import uz.muhammadyusuf.kurbonov.studentsaccounting.ui.states.DetailsCardState
-import uz.muhammadyusuf.kurbonov.utils.dateToSQLFormat
 import uz.muhammadyusuf.kurbonov.utils.formatAsDate
-import uz.muhammadyusuf.kurbonov.utils.openDatePickerDialog
 import uz.muhammadyusuf.kurbonov.utils.prettifyDate
-import java.text.NumberFormat
 import java.util.*
 
 @ExperimentalCoroutinesApi
@@ -125,20 +118,6 @@ fun DetailsScreen(
         onClosed = onClosed
     ) {
 
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = stringResource(
-                    id = R.string.details
-                ),
-                style = MaterialTheme.typography.h4,
-                modifier = Modifier.padding(defaultPadding())
-            )
-            TextButton(onClick = {
-                showState.value = DetailsCardState.Closing
-            }) {
-                Text(text = "x", color = MaterialTheme.colors.onBackground)
-            }
-        }
         Text(
             text = item?.itemDescription ?: stringResource(id = R.string.loading_label),
             modifier = Modifier.fillMaxWidth().padding(defaultMargin()),
@@ -254,12 +233,18 @@ fun AddEditScreen(item: AccountingItem? = null, onDismissRequest: () -> Unit = {
 
                     val formatter = NumberFormat.getCurrencyInstance().apply {
                         maximumFractionDigits = 0
-                        currency = Currency.getInstance("USD")
+                        currency = Currency.getInstance("UZS")
                     }
                     OutlinedTextField(
                         value = formatter.format(sum.value),
                         onValueChange = {
-                            sum.value = formatter.parse(it)?.toDouble() ?: 0.0
+                            sum.value = run {
+                                try {
+                                    formatter.parse(it).toDouble() ?: 0.0
+                                } catch (e: Exception) {
+                                    0.0
+                                }
+                            }
                         },
                         label = { Text(text = stringResource(id = R.string.description)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import uz.muhammadyusuf.kurbonov.repository.dao.AccountingDao
 import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
 
-@Database(entities = [AccountingItem::class], version = 1)
+@Database(entities = [AccountingItem::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     companion object {
         private var instance: AppDatabase? = null
@@ -16,7 +16,9 @@ abstract class AppDatabase : RoomDatabase() {
                 val builder =
                     if (!debug) Room.databaseBuilder(context, AppDatabase::class.java, "main.db")
                     else Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
-                instance = builder.build()
+                instance = builder
+                    .fallbackToDestructiveMigration()
+                    .build()
             }
             return instance!!
         }

@@ -14,7 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import uz.muhammadyusuf.kurbonov.core.viewmodels.add_edit.AddEditViewModel
 import uz.muhammadyusuf.kurbonov.core.viewmodels.main.MainViewModel
 import uz.muhammadyusuf.kurbonov.repository.models.AccountingItem
@@ -44,7 +43,8 @@ class MainActivity : AppCompatActivity() {
                         }) {
                             val coroutineScope = rememberCoroutineScope()
                             val listState =
-                                model.getAllData().collectAsState(coroutineScope.coroutineContext)
+                                model.getAllData()
+                                    .collectAsState(coroutineScope.coroutineContext)
 
                             MainScreen(listState = listState, onItemClick = {
                                 screenState.value = ScreenStates.DetailsScreenState(it.id)

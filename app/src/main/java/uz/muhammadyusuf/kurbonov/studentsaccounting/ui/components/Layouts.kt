@@ -2,7 +2,6 @@ package uz.muhammadyusuf.kurbonov.studentsaccounting.ui.components
 
 import androidx.compose.animation.transition
 import androidx.compose.foundation.ScrollableColumn
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -106,21 +105,43 @@ fun DetailsLayout(
                     .height(bottomCardHeight())
                     .offset(y = bottomCardHeight() * offset[CardGoInAnimation.offset])
                     .align(Alignment.BottomCenter)
-                    .clickable(onClick = {}).zIndex(2.0f),
+                    .zIndex(2.0f),
                 shape = RoundedCornerShape(16.dp, 16.dp),
                 elevation = 25.dp
             ) {
-                ScrollableColumn(
-                    modifier = Modifier.padding(
-                        top = defaultMargin(),
-                        start = defaultMargin(),
-                        end = defaultMargin(),
-                        bottom = 0.dp
-                    )
-                ) {
+                Column {
 
-                    content()
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(defaultPadding())
+                    ) {
+                        Text(
+                            text = stringResource(
+                                id = uz.muhammadyusuf.kurbonov.defaultresources.R.string.details
+                            ),
+                            style = MaterialTheme.typography.h4,
+                            modifier = Modifier.padding(defaultPadding())
+                        )
+                        TextButton(onClick = {
+                            showState.value = DetailsCardState.Closing
+                        }) {
+                            Text(text = "x", color = MaterialTheme.colors.onBackground)
+                        }
+                    }
 
+                    ScrollableColumn(
+                        modifier = Modifier.padding(
+                            top = defaultMargin(),
+                            start = defaultMargin(),
+                            end = defaultMargin(),
+                            bottom = 0.dp
+                        )
+                    ) {
+
+                        content()
+
+                    }
                 }
             }
         }

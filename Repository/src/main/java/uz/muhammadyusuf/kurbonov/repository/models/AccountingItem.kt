@@ -10,6 +10,5 @@ data class AccountingItem(
     var id: Int = 0,
     var itemDescription: String = "",
     var totalSum: Double = 0.0,
-    var author: String = "Muhammadyusuf",
     var date: String = System.currentTimeMillis().formatAsDate("yyyy-MM-DD")
 )
